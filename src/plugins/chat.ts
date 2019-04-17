@@ -3,7 +3,7 @@ import EventEmitter = NodeJS.EventEmitter
 
 const replacers = (new Replacers)
   .add(/^<(.*?)>\s(.*)$/, (message, player, text) => `**${player}**: ${text}`)
-  .add(/^\[(.*?)]\s(.*)$/, (message, player, text) => `**${player}**: ${text}`)
+  // .add(/^\[(.*?)]\s(.*)$/, (message, player, text) => `**${player}**: ${text}`)
 
 export default (plugin: EventEmitter) => {
   plugin.on('discord', async ({message, sendToMinecraft}: DiscordArgs) => {
