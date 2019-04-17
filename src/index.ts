@@ -6,6 +6,8 @@ import Rcon from 'modern-rcon'
 import Tail from './Tail'
 import Plugin, { loadPlugins } from './Plugin'
 
+const conf = config()
+console.log(JSON.stringify(conf))
 const {
   enable,
   disable,
@@ -16,7 +18,7 @@ const {
   discordBotToken,
   discordChannel,
   encode,
-} = config()
+} = conf
 
 process.stdout.write('Starting Minecord ... ')
 
