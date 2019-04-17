@@ -2,15 +2,16 @@
   "name": "minecord",
   "version": "0.0.25",
   "description": "Connects Discord and Minecraft Servers without any mods or plugins.",
-  "main": "./lib/index.js",
-  "module": "./src/index.js",
+  "main": "./dist/src/index.js",
+  "module": "src/index.ts",
   "files": [
-    "lib"
+    "dist"
   ],
   "bin": {
     "minecord": "./lib/index.js"
   },
   "scripts": {
+    "start": "ts-node src/index.ts",
     "build": "babel src -d lib",
     "watch": "babel src -d lib --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -32,7 +33,11 @@
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.3.1"
+    "@babel/preset-env": "^7.3.1",
+    "@types/node": "^11.13.4",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.3"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",

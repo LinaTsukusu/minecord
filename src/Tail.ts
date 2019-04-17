@@ -1,21 +1,24 @@
 import { EventEmitter } from 'events'
-import { createReadStream, statSync } from 'fs'
+import {createReadStream, Stats, statSync} from 'fs'
 import { createInterface } from 'readline'
 import { dirname } from 'path'
-import { watch } from 'chokidar'
+import { FSWatcher, watch } from 'chokidar'
 import { decodeStream } from 'iconv-lite'
 
 export default class Tail extends EventEmitter {
-  constructor (filename, encode = 'utf-8') {
+  private readonly filename: string
+  private encode: string
+  private watcher: FSWatcher | null = null
+  private position = 0
+
+  constructor (filename: string, encode = 'utf-8') {
     super()
     this.filename = filename
     this.encode = encode
-    this.watcher = null
-    this.position = 0
     this.watch()
   }
 
-  watch () {
+  private watch () {
     if (this.watcher) return
 
     const stats = this._getStats()
@@ -29,21 +32,21 @@ export default class Tail extends EventEmitter {
         pollInterval: 50,
       },
     }).on('add', (basename, stats) => {
-      if (basename === this.filename) this._handleCreateFile(stats)
+      if (basename === this.filename) this._handleCreateFile(stats!)
     }).on('change', (basename, stats) => {
-      if (basename === this.filename) this._handleChangeFile(stats)
+      if (basename === this.filename) this._handleChangeFile(stats!)
     }).on('unlink', basename => {
       if (basename === this.filename) this._handleRemoveFile()
     })
   }
 
-  unwatch () {
+  private unwatch () {
     if (!this.watcher) return
     this.watcher.close()
     this.watcher = null
   }
 
-  _getStats () {
+  private _getStats () {
     try {
       return statSync(this.filename)
     } catch (e) {
@@ -51,12 +54,12 @@ export default class Tail extends EventEmitter {
     }
   }
 
-  _handleCreateFile (stats) {
+  private _handleCreateFile (stats: Stats) {
     this.position = 0
     this._handleChangeFile(stats)
   }
 
-  _handleChangeFile (stats) {
+  private _handleChangeFile (stats: Stats) {
     if (stats.size < this.position) this.position = 0
 
     if (!stats.size) return
@@ -73,7 +76,7 @@ export default class Tail extends EventEmitter {
     this.position = stats.size
   }
 
-  _handleRemoveFile () {
+  private _handleRemoveFile () {
     this.position = 0
   }
 }

@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import '@babel/polyfill'
 import config from './config'
-import { Client } from 'discord.js'
+import {Client, TextChannel} from 'discord.js'
 import Rcon from 'modern-rcon'
 import Tail from './Tail'
-import { loadPlugins } from './Plugin'
+import Plugin, { loadPlugins } from './Plugin'
 
 const {
   enable,
@@ -21,46 +20,57 @@ const {
 
 process.stdout.write('Starting Minecord ... ')
 
-const plugins = loadPlugins(enable.filter(pluginName => !disable.includes(pluginName)))
+loadPlugins(enable.filter(pluginName => !disable.includes(pluginName)))
+const plugin = Plugin.instance
 
 const client = new Client()
 const rcon = new Rcon(minecraftRconHost, minecraftRconPort, minecraftRconPassword)
 const tail = new Tail(minecraftLog, encode)
 
-let channel
-
-const sendToDiscord = (...args) => channel.send(...args)
-const sendToMinecraft = (...args) => rcon.send(...args)
+let channel: TextChannel
+const sendToDiscord: SendMethod = (...args: string[]) => channel.send(...args)
+const sendToMinecraft: SendMethod = async (...args: string[]) => {
+  try {
+    await rcon.connect()
+    await rcon.send(...args)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    await rcon.disconnect()
+  }
+}
 
 client.on('ready', () => {
-  channel = client.channels.get(discordChannel)
+  channel = client.channels.get(discordChannel)! as TextChannel
   console.log('Done!!')
 })
 
-client.on('message', async message => {
+client.on('message', message => {
   if (message.channel.id !== channel.id) return
   if (message.author.bot || message.author.id === client.user.id) return
 
-  await rcon.connect()
-  await Promise.all(plugins.map(({ discord }) => discord({
+  plugin.emit('discord', {
     message,
     channel,
     user: client.user,
     sendToDiscord,
     sendToMinecraft,
-  })))
-  await rcon.disconnect()
+  })
+})
+
+client.on('error', (error) => {
+  console.error(error)
 })
 
 const regexpLog = /^\[(.*)]\s\[([^/]*)\/(.*)][^:]*:\s(.*)$/
 
-tail.on('line', async line => {
+tail.on('line', (line: string) => {
   if (!regexpLog.test(line)) return
 
-  const [log, time, causedAt, level, message] = regexpLog.exec(line)
+  const [log, time, causedAt, level, message] = regexpLog.exec(line)!
   console.log(log)
 
-  await Promise.all(plugins.map(({ minecraft }) => minecraft({
+  plugin.emit('minecraft', {
     log,
     time,
     causedAt,
@@ -70,7 +80,7 @@ tail.on('line', async line => {
     user: client.user,
     sendToDiscord,
     sendToMinecraft,
-  })))
+  })
 })
 
 client.login(discordBotToken)

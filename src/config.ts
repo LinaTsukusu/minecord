@@ -1,7 +1,7 @@
 import program from 'commander'
 import packageJson from '../package.json'
 
-const configDefault = {
+const configDefault: Config = {
   pluginsDir: null,
   enable: ['chat'],
   disable: [],
@@ -29,12 +29,12 @@ program
   .option('--encode <charset>', 'set characterset of log file (default: utf-8)')
   .parse(process.argv)
 
-let cache = null
+let cache: Config | null = null
 
-export default () => {
+export default (): Config => {
   if (cache) return cache
 
-  const config = program.config ? require(program.config) : {}
+  const config: Config = program.config ? require(program.config) : {}
 
   return cache = {
     pluginsDir: program.pluginsDir || config.pluginsDir || configDefault.pluginsDir,

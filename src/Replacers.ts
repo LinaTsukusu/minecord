@@ -1,16 +1,18 @@
 import Replacer from './Replacer'
 
 export default class Replacers {
+  private replacers: Replacer[]
+
   constructor () {
     this.replacers = []
   }
 
-  add (regexp, replacer) {
+  public add(regexp: RegExp, replacer: (...args: string[]) => string) {
     this.replacers.push(new Replacer(regexp, replacer))
     return this
   }
 
-  replace (str) {
+  public replace(str: string) {
     const replacer = this.replacers.find(replacer => replacer.test(str))
     return replacer ? replacer.replace(str) : false
   }
