@@ -15,6 +15,6 @@ export default (plugin: EventEmitter) => {
     if (causedAt !== 'Server thread' || level !== 'INFO') return
 
     const newMessage = replacers.replace(message)
-    if (newMessage !== false) await sendToDiscord(newMessage)
+    if (newMessage !== false) sendToDiscord(newMessage)
   })
 }

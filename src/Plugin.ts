@@ -1,5 +1,5 @@
 import config from './config'
-import EventEmitter = NodeJS.EventEmitter
+import {EventEmitter} from 'events'
 import * as path from 'path'
 
 
