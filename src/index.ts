@@ -64,7 +64,7 @@ client.on('error', (error) => {
   console.error(error)
 })
 
-const regexpLog = /^\[(.*)]\s\[([^/]*)\/(.*)?][^:]*:\s(.*)$/
+const regexpLog = /^\[(.*)]\s\[([^/]*)\/(.*?)][^:]*:\s(.*)$/
 
 tail.on('line', (line: string) => {
   if (!regexpLog.test(line)) return
