@@ -11,10 +11,9 @@
     "minecord": "./lib/index.js"
   },
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "build": "babel src -d lib",
-    "watch": "babel src -d lib --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/src/index.js"
   },
   "repository": {
     "type": "git",
